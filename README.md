@@ -1,6 +1,6 @@
 # HYPER.MD - Brutalist SEO-First Markdown Editor & Publisher
 
-[![[cloudflarebutton]]](https://deploy.workers.cloudflare.com/?url=${repositoryUrl})
+[![[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/mikeschlottig/hyper-md-brutalist-seo-first-markdown-editor-publisher)]](https://deploy.workers.cloudflare.com/?url=${repositoryUrl})
 
 HYPER.MD is a high-performance, visually striking Markdown editing and publishing platform designed with a raw Brutalist aesthetic. It bridges the gap between content creation and technical SEO optimization.
 
@@ -123,7 +123,7 @@ Deploy to Cloudflare Workers with full-stack persistence:
 
 Bindings auto-configured (Durable Object ready). Assets served as SPA.
 
-[![[cloudflarebutton]]](https://deploy.workers.cloudflare.com/?url=${repositoryUrl})
+[![[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/mikeschlottig/hyper-md-brutalist-seo-first-markdown-editor-publisher)]](https://deploy.workers.cloudflare.com/?url=${repositoryUrl})
 
 ## 📱 Responsive Design
 - Mobile-first: Stacks vertically, 60px+ touch targets
