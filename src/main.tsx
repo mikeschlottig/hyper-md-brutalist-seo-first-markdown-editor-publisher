@@ -11,18 +11,42 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import '@/index.css'
-import { HomePage } from '@/pages/HomePage'
-
+import { HomePage } from '@/pages/HomePage';
+import { BrutalistLayout } from '@/components/layout/BrutalistLayout';
+import { DashboardPage } from '@/pages/DashboardPage';
+import { EditorPage } from '@/pages/EditorPage';
 const queryClient = new QueryClient();
-
 const router = createBrowserRouter([
   {
     path: "/",
     element: <HomePage />,
     errorElement: <RouteErrorBoundary />,
   },
+  {
+    path: "/app",
+    element: <BrutalistLayout />,
+    errorElement: <RouteErrorBoundary />,
+    children: [
+      {
+        index: true,
+        element: <DashboardPage />,
+      },
+      {
+        path: "editor/:id",
+        element: <EditorPage />,
+      },
+      // Add Analytics and Settings routes here later
+      {
+        path: "analytics",
+        element: <div className="p-8">Analytics Page (Coming Soon)</div>,
+      },
+      {
+        path: "settings",
+        element: <div className="p-8">Settings Page (Coming Soon)</div>,
+      },
+    ]
+  }
 ]);
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
@@ -32,4 +56,3 @@ createRoot(document.getElementById('root')!).render(
     </QueryClientProvider>
   </StrictMode>,
 )
-   

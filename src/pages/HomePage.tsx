@@ -1,138 +1,59 @@
-// Home page of the app.
-// Currently a demo placeholder "please wait" screen.
-// Replace this file with your actual app UI. Do not delete it to use some other file as homepage. Simply replace the entire contents of this file.
-
-import { useEffect, useMemo, useState } from 'react'
-import { Sparkles } from 'lucide-react'
-
-import { ThemeToggle } from '@/components/ThemeToggle'
-import { HAS_TEMPLATE_DEMO, TemplateDemo } from '@/components/TemplateDemo'
-import { Button } from '@/components/ui/button'
-import { Toaster, toast } from '@/components/ui/sonner'
-
-function formatDuration(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000))
-  const m = Math.floor(total / 60)
-  const s = total % 60
-  return `${m}:${s.toString().padStart(2, '0')}`
-}
-
-export function HomePage() {
-  const [coins, setCoins] = useState(0)
-  const [isRunning, setIsRunning] = useState(false)
-  const [startedAt, setStartedAt] = useState<number | null>(null)
-  const [elapsedMs, setElapsedMs] = useState(0)
-
-  useEffect(() => {
-    if (!isRunning || startedAt === null) return
-
-    const t = setInterval(() => {
-      setElapsedMs(Date.now() - startedAt)
-    }, 250)
-
-    return () => clearInterval(t)
-  }, [isRunning, startedAt])
-
-  const formatted = useMemo(() => formatDuration(elapsedMs), [elapsedMs])
-
-  const onPleaseWait = () => {
-    setCoins((c) => c + 1)
-
-    if (!isRunning) {
-      // Resume from the current elapsed time
-      setStartedAt(Date.now() - elapsedMs)
-      setIsRunning(true)
-      toast.success('Building your app…', {
-        description: "Hang tight — we're setting everything up.",
-      })
-      return
-    }
-
-    setIsRunning(false)
-    toast.info('Still working…', {
-      description: 'You can come back in a moment.',
-    })
-  }
-
-  const onReset = () => {
-    setCoins(0)
-    setIsRunning(false)
-    setStartedAt(null)
-    setElapsedMs(0)
-    toast('Reset complete')
-  }
-
-  const onAddCoin = () => {
-    setCoins((c) => c + 1)
-    toast('Coin added')
-  }
-
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground p-4 overflow-hidden relative">
-      <ThemeToggle />
-      <div className="absolute inset-0 bg-gradient-rainbow opacity-10 dark:opacity-20 pointer-events-none" />
-
-      <div className="text-center space-y-8 relative z-10 animate-fade-in w-full">
-        <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-primary floating">
-            <Sparkles className="w-8 h-8 text-white rotating" />
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <h1 className="text-5xl md:text-7xl font-display font-bold text-balance leading-tight">
-            Creating your <span className="text-gradient">app</span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto text-pretty">
-            Your application would be ready soon.
-          </p>
-        </div>
-
-        {HAS_TEMPLATE_DEMO ? (
-          <div className="max-w-5xl mx-auto text-left">
-            <TemplateDemo />
-          </div>
-        ) : (
-          <>
-            <div className="flex justify-center gap-4">
-              <Button
-                size="lg"
-                onClick={onPleaseWait}
-                className="btn-gradient px-8 py-4 text-lg font-semibold hover:-translate-y-0.5 transition-all duration-200"
-                aria-live="polite"
-              >
-                Please Wait
-              </Button>
-            </div>
-
-            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-              <div>
-                Time elapsed:{' '}
-                <span className="font-medium tabular-nums text-foreground">{formatted}</span>
-              </div>
-              <div>
-                Coins:{' '}
-                <span className="font-medium tabular-nums text-foreground">{coins}</span>
-              </div>
-            </div>
-
-            <div className="flex justify-center gap-2">
-              <Button variant="outline" size="sm" onClick={onReset}>
-                Reset
-              </Button>
-              <Button variant="outline" size="sm" onClick={onAddCoin}>
-                Add Coin
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
-
-      <footer className="absolute bottom-8 text-center text-muted-foreground/80">
-        <p>Powered by Cloudflare</p>
-      </footer>
-
-      <Toaster richColors closeButton />
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
+const MarqueeText = ({ children, className }: { children: React.ReactNode, className?: string }) => (
+  <div className={`relative flex overflow-x-hidden font-bold uppercase ${className}`}>
+    <div className="animate-marquee whitespace-nowrap">
+      {children}
     </div>
-  )
+    <div className="absolute top-0 animate-marquee2 whitespace-nowrap">
+      {children}
+    </div>
+  </div>
+);
+export function HomePage() {
+  return (
+    <div className="min-h-screen w-full bg-background text-foreground flex flex-col overflow-hidden">
+      <header className="w-full p-4 border-b-2 border-foreground">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-bold font-mono tracking-tighter">HYPER.MD</h1>
+          <Link to="/app" className="btn-brutal btn-brutal-primary px-4 py-2 text-sm">
+            Launch Editor
+          </Link>
+        </div>
+      </header>
+      <main className="flex-1 flex flex-col items-center justify-center text-center p-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="space-y-4">
+            <h2 className="text-6xl md:text-8xl lg:text-9xl font-extrabold font-display tracking-tighter leading-none">
+              BRUTALIST.
+              <br />
+              SEO-FIRST.
+              <br />
+              MARKDOWN.
+            </h2>
+            <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground font-mono">
+              A raw, high-performance Markdown editor that fuses content creation with technical SEO optimization. No fluff. Just speed and power.
+            </p>
+          </div>
+          <Link to="/app" className="btn-brutal btn-brutal-primary text-xl">
+            Initialize System <ArrowRight className="ml-2 h-6 w-6" />
+          </Link>
+        </div>
+      </main>
+      <footer className="w-full border-t-2 border-foreground bg-hyper-lime text-black">
+        <MarqueeText className="py-4 text-2xl md:text-4xl">
+          <span className="mx-4">95+ LIGHTHOUSE SCORE</span>
+          <span className="mx-4">&bull;</span>
+          <span className="mx-4">META TAGS</span>
+          <span className="mx-4">&bull;</span>
+          <span className="mx-4">OPEN GRAPH</span>
+          <span className="mx-4">&bull;</span>
+          <span className="mx-4">KEYWORD ANALYSIS</span>
+          <span className="mx-4">&bull;</span>
+          <span className="mx-4">PUBLISH TO WORKERS</span>
+          <span className="mx-4">&bull;</span>
+        </MarqueeText>
+      </footer>
+    </div>
+  );
 }

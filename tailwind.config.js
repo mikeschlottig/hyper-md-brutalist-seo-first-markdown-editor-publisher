@@ -83,13 +83,15 @@ export default {
   			'128': '32rem'
   		},
   		borderRadius: {
-  			'4xl': '2rem',
-  			'5xl': '2.5rem',
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			'4xl': '0',
+  			'5xl': '0',
+  			lg: '0',
+  			md: '0',
+  			sm: '0',
+        DEFAULT: '0'
   		},
   		colors: {
+        'hyper-lime': '#CCFF00',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			muted: {
@@ -142,6 +144,8 @@ export default {
   			}
   		},
   		boxShadow: {
+        'neo-brutal': '4px 4px 0px 0px #000',
+        'neo-brutal-hover': '6px 6px 0px 0px #000',
   			soft: '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
   			glow: '0 0 20px -5px rgba(99, 102, 241, 0.4)',
   			'glow-lg': '0 0 40px -10px rgba(99, 102, 241, 0.3)',
@@ -149,6 +153,10 @@ export default {
   			glass: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
   		},
   		keyframes: {
+        'marquee': {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
   			'fade-in': {
   				'0%': {
   					opacity: '0',
@@ -221,6 +229,7 @@ export default {
   			}
   		},
   		animation: {
+        'marquee': 'marquee 30s linear infinite',
   			'fade-in': 'fade-in 0.6s ease-out',
   			'slide-up': 'slide-up 0.4s ease-out',
   			'scale-in': 'scale-in 0.3s ease-out',
