@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -8,7 +10,15 @@ import { useEditorStore } from '@/store/editorStore';
 import { analyzeSeo, SeoAnalysis } from '@/lib/seo-analyzer';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { CheckCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2, Save } from 'lucide-react';
+import { api } from '@/lib/api-client';
+import type { Project } from '@shared/types';
+import { useDebounce } from 'react-use';
+const fetchProject = (id: string) => api<Project>(`/api/projects/${id}`);
+const updateProject = (project: Partial<Project> & { id: string }) => api<Project>(`/api/projects/${project.id}`, {
+  method: 'PATCH',
+  body: JSON.stringify(project),
+});
 const SeoIndicator = ({ label, value }: { label: string; value: string | number }) => (
   <div className="flex justify-between items-center text-sm">
     <span className="text-muted-foreground">{label}</span>
@@ -22,27 +32,74 @@ const FeedbackItem = ({ text, ok }: { text: string; ok: boolean }) => (
   </div>
 );
 export function EditorPage() {
-  const markdown = useEditorStore(s => s.markdown);
-  const title = useEditorStore(s => s.title);
-  const description = useEditorStore(s => s.description);
-  const keywords = useEditorStore(s => s.keywords);
-  const setMarkdown = useEditorStore(s => s.setMarkdown);
-  const setTitle = useEditorStore(s => s.setTitle);
-  const setDescription = useEditorStore(s => s.setDescription);
-  const setKeywords = useEditorStore(s => s.setKeywords);
-  const reset = useEditorStore(s => s.reset);
+  const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+  const markdown = useEditorStore(state => state.markdown);
+  const title = useEditorStore(state => state.title);
+  const description = useEditorStore(state => state.description);
+  const keywords = useEditorStore(state => state.keywords);
+  const projectId = useEditorStore(state => state.projectId);
+  const setMarkdown = useEditorStore(state => state.setMarkdown);
+  const setTitle = useEditorStore(state => state.setTitle);
+  const setDescription = useEditorStore(state => state.setDescription);
+  const setKeywords = useEditorStore(state => state.setKeywords);
+  const setProject = useEditorStore(state => state.setProject);
+  const reset = useEditorStore(state => state.reset);
+  const { data: projectData, isLoading, isError } = useQuery({
+    queryKey: ['project', id],
+    queryFn: () => fetchProject(id!),
+    enabled: !!id && id !== 'new',
+  });
+  const saveMutation = useMutation({
+    mutationFn: updateProject,
+    onSuccess: (updatedProject) => {
+      queryClient.setQueryData(['project', updatedProject.id], updatedProject);
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
   useEffect(() => {
-    // Reset store on mount/unmount to not carry over state between different "projects"
+    if (projectData) {
+      setProject(projectData);
+    }
     return () => {
-      reset();
+      if (id !== projectId) {
+        reset();
+      }
     };
-  }, [reset]);
+  }, [projectData, id, setProject, reset, projectId]);
+  const debouncedState = useMemo(() => ({
+    markdown, title, description, keywords
+  }), [markdown, title, description, keywords]);
+  useDebounce(() => {
+    if (id && id !== 'new' && projectData && (
+      debouncedState.markdown !== projectData.markdown ||
+      debouncedState.title !== projectData.title ||
+      debouncedState.description !== projectData.description ||
+      debouncedState.keywords !== projectData.keywords
+    )) {
+      saveMutation.mutate({ id, ...debouncedState });
+    }
+  }, 1500, [debouncedState, id, projectData]);
   const analysis: SeoAnalysis = useMemo(
     () => analyzeSeo(markdown, title, description, keywords),
     [markdown, title, description, keywords]
   );
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-full"><Loader2 className="h-12 w-12 animate-spin text-hyper-lime" /></div>;
+  }
+  if (isError) {
+    return <div className="flex items-center justify-center h-full text-red-500">Error loading project.</div>;
+  }
   return (
     <div className="h-full flex flex-col">
+      <div className="h-12 flex-shrink-0 border-b-2 border-foreground flex items-center px-6 justify-between">
+        <h2 className="font-bold text-lg">{title}</h2>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          {saveMutation.isPending && <><Loader2 className="h-4 w-4 animate-spin" /><span>Saving...</span></>}
+          {saveMutation.isSuccess && <><CheckCircle className="h-4 w-4 text-green-500" /><span>Saved</span></>}
+          {saveMutation.isError && <><AlertCircle className="h-4 w-4 text-red-500" /><span>Error</span></>}
+        </div>
+      </div>
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={50}>
           <Textarea

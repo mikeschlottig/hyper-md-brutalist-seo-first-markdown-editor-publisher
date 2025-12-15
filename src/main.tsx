@@ -15,7 +15,14 @@ import { HomePage } from '@/pages/HomePage';
 import { BrutalistLayout } from '@/components/layout/BrutalistLayout';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { EditorPage } from '@/pages/EditorPage';
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60, // 1 minute
+      retry: 1,
+    },
+  },
+});
 const router = createBrowserRouter([
   {
     path: "/",

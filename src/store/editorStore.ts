@@ -1,5 +1,7 @@
 import { create } from 'zustand';
-type EditorState = {
+import type { Project } from '@shared/types';
+export type EditorState = {
+  projectId: string | null;
   markdown: string;
   title: string;
   description: string;
@@ -8,11 +10,13 @@ type EditorState = {
   setTitle: (title: string) => void;
   setDescription: (description: string) => void;
   setKeywords: (keywords: string) => void;
+  setProject: (project: Project) => void;
   reset: () => void;
 };
 const initialState = {
+  projectId: null,
   markdown: '# Hello, Brutalist World!\n\nStart typing your SEO-optimized content here.',
-  title: '',
+  title: 'New Project',
   description: '',
   keywords: '',
 };
@@ -22,5 +26,12 @@ export const useEditorStore = create<EditorState>((set) => ({
   setTitle: (title) => set({ title }),
   setDescription: (description) => set({ description }),
   setKeywords: (keywords) => set({ keywords }),
+  setProject: (project) => set({
+    projectId: project.id,
+    markdown: project.markdown,
+    title: project.title,
+    description: project.description,
+    keywords: project.keywords,
+  }),
   reset: () => set(initialState),
 }));
