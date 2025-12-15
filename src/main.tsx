@@ -15,6 +15,8 @@ import { HomePage } from '@/pages/HomePage';
 import { BrutalistLayout } from '@/components/layout/BrutalistLayout';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { EditorPage } from '@/pages/EditorPage';
+import { BuilderPage } from '@/pages/BuilderPage';
+import { AnalyticsPage } from '@/pages/AnalyticsPage';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -43,17 +45,12 @@ const router = createBrowserRouter([
         element: <EditorPage />,
       },
       {
-        path: "builder/:id",
+        path: "builder/:id?",
         element: <BuilderPage />,
       },
       {
-        path: "analytics/:id",
+        path: "analytics/:id?",
         element: <AnalyticsPage />,
-      },
-      // Add Analytics and Settings routes here later
-      {
-        path: "analytics",
-        element: <div className="p-8">Analytics Page (Coming Soon)</div>,
       },
       {
         path: "settings",
