@@ -80,6 +80,19 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await project.patch(updatedData);
     return ok(c, await project.getState());
   });
+
+  app.patch('/api/projects/:id/layout', async (c) => {
+    const id = c.req.param('id');
+    const { layout } = (await c.req.json()) as { layout?: string[] };
+    if (!Array.isArray(layout)) return bad(c, 'layout must be an array');
+    
+    const project = new ProjectEntity(c.env, id);
+    if (!await project.exists()) return notFound(c, 'project not found');
+
+    await project.patch({ layout, updatedAt: Date.now() });
+    return ok(c, await project.getState());
+  });
+
   app.delete('/api/projects/:id', async (c) => {
     const id = c.req.param('id');
     const deleted = await ProjectEntity.delete(c.env, id);
@@ -87,6 +100,23 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
   // DELETE: Users
   app.delete('/api/users/:id', async (c) => ok(c, { id: c.req.param('id'), deleted: await UserEntity.delete(c.env, c.req.param('id')) }));
+
+  // MOCK ANALYTICS
+  app.get('/api/analytics/:projectId', async (c) => {
+    const mockData = {
+      totalVisitors: 2435,
+      pageViews: 9876,
+      bounceRate: 42.5,
+      traffic: Array.from({ length: 7 }, (_, i) => ({ name: `Day ${i + 1}`, uv: Math.floor(Math.random() * 500) + 100 })),
+      lighthouseScores: [
+        { name: 'Perf', score: 98 }, { name: 'A11y', score: 100 }, { name: 'Best', score: 95 }, { name: 'SEO', score: 100 },
+      ],
+      topPages: [{ path: '/', views: 4502 }, { path: '/about', views: 1234 }, { path: '/contact', views: 876 }],
+      trafficSources: [{ name: 'Direct', value: 400 }, { name: 'Google', value: 300 }, { name: 'Twitter', value: 200 }, { name: 'Other', value: 100 }],
+    };
+    return ok(c, mockData);
+  });
+
   app.post('/api/users/deleteMany', async (c) => {
     const { ids } = (await c.req.json()) as { ids?: string[] };
     const list = ids?.filter(isStr) ?? [];

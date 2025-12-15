@@ -42,6 +42,14 @@ const router = createBrowserRouter([
         path: "editor/:id",
         element: <EditorPage />,
       },
+      {
+        path: "builder/:id",
+        element: <BuilderPage />,
+      },
+      {
+        path: "analytics/:id",
+        element: <AnalyticsPage />,
+      },
       // Add Analytics and Settings routes here later
       {
         path: "analytics",

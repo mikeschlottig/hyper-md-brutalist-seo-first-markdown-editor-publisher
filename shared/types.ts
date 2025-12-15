@@ -27,4 +27,16 @@ export interface Project {
   description: string;
   keywords: string;
   updatedAt: number; // epoch millis
+  layout?: string[];
+}
+
+// HYPER.MD Analytics Type
+export interface AnalyticsData {
+  totalVisitors: number;
+  pageViews: number;
+  bounceRate: number;
+  traffic: { name: string; uv: number }[];
+  lighthouseScores: { name: string; score: number }[];
+  topPages: { path: string; views: number }[];
+  trafficSources: { name: string; value: number }[];
 }

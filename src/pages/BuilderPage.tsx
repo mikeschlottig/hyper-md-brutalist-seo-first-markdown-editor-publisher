@@ -11,37 +11,33 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import type { Project } from '@shared/types';
 const BRICKS = {
-  HERO: { id: 'HERO', name: 'Hero Section', icon: Heading1 },
-  TEXT: { id: 'TEXT', name: 'Text Block', icon: Text },
-  GRID: { id: 'GRID', name: 'Feature Grid', icon: LayoutGrid },
+  HERO: { id: 'HERO', name: 'Hero Section', icon: Heading1, markdown: (title: string) => `# ${title}\n\nA powerful hero section to grab attention.` },
+  TEXT: { id: 'TEXT', name: 'Text Block', icon: Text, markdown: () => `## A Catchy Subheading\n\nThis is a paragraph of text. You can write about your features, services, or any other information you want to share. Make it informative and engaging.` },
+  GRID: { id: 'GRID', name: 'Feature Grid', icon: LayoutGrid, markdown: () => `### Feature One\n\nDescription for feature one.\n\n### Feature Two\n\nDescription for feature two.\n\n### Feature Three\n\nDescription for feature three.` },
 };
 type BrickType = keyof typeof BRICKS;
-const SortableBrick = ({ id, type }: { id: string, type: BrickType }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
+const Brick = ({ id, type, isOverlay }: { id: string, type: BrickType, isOverlay?: boolean }) => {
   const brickInfo = BRICKS[type];
+  if (!brickInfo) return null;
+  const { ref, attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+  const style = { transform: CSS.Transform.toString(transform), transition };
+  if (isOverlay) {
+    return (
+      <div className="card-brutal flex items-center gap-4 p-4 bg-hyper-lime text-black">
+        <brickInfo.icon className="h-6 w-6" />
+        <span className="font-bold">{brickInfo.name}</span>
+      </div>
+    );
+  }
   return (
     <div ref={setNodeRef} style={style} className="card-brutal flex items-center justify-between p-4 bg-background mb-4">
       <div className="flex items-center gap-4">
         <brickInfo.icon className="h-6 w-6 text-muted-foreground" />
         <span className="font-bold">{brickInfo.name}</span>
       </div>
-      <button {...attributes} {...listeners} className="p-2 cursor-grab active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-ring">
+      <div {...attributes} {...listeners} className="p-2 cursor-grab active:cursor-grabbing">
         <GripVertical className="h-6 w-6 text-muted-foreground" />
-      </button>
-    </div>
-  );
-};
-const BrickOverlay = ({ type }: { type: BrickType }) => {
-  const brickInfo = BRICKS[type];
-  return (
-    <div className="card-brutal flex items-center gap-4 p-4 bg-hyper-lime text-black">
-      <brickInfo.icon className="h-6 w-6" />
-      <span className="font-bold">{brickInfo.name}</span>
+      </div>
     </div>
   );
 };
@@ -62,12 +58,8 @@ export function BuilderPage() {
     queryKey: ['project', id],
     queryFn: () => api<Project>(`/api/projects/${id!}`),
     enabled: !!id && id !== 'new',
+    onSuccess: (data) => setProject(data),
   });
-  useEffect(() => {
-    if (projectData) {
-      setProject(projectData);
-    }
-  }, [projectData, setProject]);
   const saveMutation = useMutation({
     mutationFn: updateProjectLayout,
     onSuccess: (updatedProject) => {
@@ -82,11 +74,9 @@ export function BuilderPage() {
     setActiveId(null);
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      const oldIndex = layout.findIndex(item => item === active.id);
-      const newIndex = layout.findIndex(item => item === over.id);
-      if (oldIndex !== -1 && newIndex !== -1) {
-        setLayout(arrayMove(layout, oldIndex, newIndex));
-      }
+      const oldIndex = layout.findIndex(item => item.startsWith(active.id as string));
+      const newIndex = layout.findIndex(item => item.startsWith(over.id as string));
+      setLayout(arrayMove(layout, oldIndex, newIndex));
     }
   };
   const addBrick = (type: BrickType) => {
@@ -119,7 +109,7 @@ export function BuilderPage() {
               {saveMutation.isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Save className="mr-2 h-5 w-5" />}
               Save Layout
             </Button>
-            <Button onClick={() => navigate(`/app/editor/${id || 'new'}`)} variant="outline" className="w-full btn-brutal">
+            <Button onClick={() => navigate(`/app/editor/${id}`)} variant="outline" className="w-full btn-brutal">
               <ArrowLeft className="mr-2 h-5 w-5" />
               Back to Editor
             </Button>
@@ -129,10 +119,10 @@ export function BuilderPage() {
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl font-bold mb-2">{title}</h1>
             <p className="text-muted-foreground mb-8">Drag and drop bricks to build your page structure.</p>
-            <SortableContext items={layout} strategy={verticalListSortingStrategy}>
+            <SortableContext items={layout.map(id => id.split('_')[0])} strategy={verticalListSortingStrategy}>
               {layout.map((fullId) => {
                 const [type] = fullId.split('_') as [BrickType];
-                return <SortableBrick key={fullId} id={fullId} type={type} />;
+                return <Brick key={fullId} id={fullId} type={type} />;
               })}
             </SortableContext>
             {layout.length === 0 && (
@@ -143,7 +133,7 @@ export function BuilderPage() {
           </div>
         </main>
       </div>
-      <DragOverlay>{activeId && activeBrickType ? <BrickOverlay type={activeBrickType} /> : null}</DragOverlay>
+      <DragOverlay>{activeId && activeBrickType ? <Brick id={activeId} type={activeBrickType} isOverlay /> : null}</DragOverlay>
     </DndContext>
   );
 }

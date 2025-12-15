@@ -1,14 +1,22 @@
 import React from 'react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Pencil, BarChart2, Settings, FileText } from 'lucide-react';
+import { Link, NavLink, Outlet, useParams } from 'react-router-dom';
+import { LayoutDashboard, Pencil, BarChart2, Settings, FileText, Brush } from 'lucide-react';
 import { cn } from '@/lib/utils';
-const navItems = [
-  { to: '/app', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/app/editor/new', icon: Pencil, label: 'Editor' },
-  { to: '/app/analytics', icon: BarChart2, label: 'Analytics' },
-  { to: '/app/settings', icon: Settings, label: 'Settings' },
-];
+
+const getNavItems = (projectId?: string) => {
+  const id = projectId || 'new';
+  return [
+    { to: '/app', icon: LayoutDashboard, label: 'Dashboard', end: true },
+    { to: `/app/editor/${id}`, icon: Pencil, label: 'Editor', end: false },
+    { to: `/app/builder/${id}`, icon: Brush, label: 'Builder', end: false },
+    { to: `/app/analytics/${id}`, icon: BarChart2, label: 'Analytics', end: false },
+    { to: '/app/settings', icon: Settings, label: 'Settings', end: false },
+  ];
+};
+
 export function BrutalistLayout() {
+  const { id } = useParams<{ id: string }>();
+  const navItems = getNavItems(id);
   return (
     <div className="min-h-screen w-full flex bg-background text-foreground font-mono">
       <aside className="w-16 md:w-64 border-r-2 border-foreground flex flex-col">
@@ -23,7 +31,7 @@ export function BrutalistLayout() {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/app'}
+              end={item.end}
               className={({ isActive }) =>
                 cn(
                   'flex items-center gap-4 p-3 border-2 border-transparent hover:border-foreground hover:bg-muted transition-colors',
